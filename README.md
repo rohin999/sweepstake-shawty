@@ -1,8 +1,6 @@
 # World Cup 2026 Sweepstakes
 
-A private web app for a 12-person, 4-teams-each World Cup sweepstakes.
-
-**Live:** https://rohin999.github.io/sweepstake/
+A web app for a 12-person, 4-teams-each World Cup sweepstakes.
 
 ## Features
 
