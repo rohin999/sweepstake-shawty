@@ -20,6 +20,12 @@ const N = PEOPLE.length; // 12
 const TOTAL = N * 4; // 48
 const STORAGE_KEY = "wc26-draw-v1";
 const SPIN_MS = 4200;
+// "Skip" mode: a brisk auto-run through the remaining draws. Fast enough to
+// stay lively, slow enough that you can still watch each spin land and read
+// the card before it moves on.
+const FAST_SPIN_MS = 750;
+const FAST_REVEAL_MS = 650;
+const FAST_GAP_MS = 150;
 
 type Phase = "idle" | "spinning" | "revealed";
 
@@ -50,6 +56,7 @@ export default function Draw() {
   const [spinDuration, setSpinDuration] = useState(0);
   const [locked, setLocked] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [auto, setAuto] = useState(false);
 
   const restoredRef = useRef(false);
   const spinTimer = useRef<number | null>(null);
@@ -168,35 +175,39 @@ export default function Draw() {
     setLocked(false);
   }, []);
 
-  const spin = useCallback(() => {
-    if (busyRef.current || !assignments || phase !== "idle" || done) return;
-    const { qi, pi } = stepToCoord(revealed);
-    const team = assignments[qi].pairs[pi].team;
-    // Land on the team's slice within the *current* wheel (picked teams removed).
-    const idx = wheel.teams.findIndex((t) => t.id === team.id);
-    if (idx < 0) return;
-    busyRef.current = true;
-    const seg = 360 / wheel.teams.length;
-    const targetCenter = (idx + 0.5) * seg;
+  const spin = useCallback(
+    (fast = false) => {
+      if (busyRef.current || !assignments || phase !== "idle" || done) return;
+      const { qi, pi } = stepToCoord(revealed);
+      const team = assignments[qi].pairs[pi].team;
+      // Land on the team's slice within the *current* wheel (picked teams removed).
+      const idx = wheel.teams.findIndex((t) => t.id === team.id);
+      if (idx < 0) return;
+      busyRef.current = true;
+      const seg = 360 / wheel.teams.length;
+      const targetCenter = (idx + 0.5) * seg;
 
-    const reduce = prefersReducedMotion();
-    const spins = reduce ? 0 : 5;
-    setSpinDuration(reduce ? 0 : SPIN_MS);
-    setRotation((prev) => {
-      const currentMod = ((prev % 360) + 360) % 360;
-      const desiredMod = ((360 - targetCenter) % 360 + 360) % 360;
-      const delta = (desiredMod - currentMod + 360) % 360;
-      return prev + spins * 360 + delta;
-    });
-    setPhase("spinning");
-    spinTimer.current = window.setTimeout(
-      () => {
-        setRevealed((r) => r + 1);
-        setPhase("revealed");
-      },
-      reduce ? 60 : SPIN_MS + 200
-    );
-  }, [assignments, phase, done, revealed, wheel]);
+      const reduce = prefersReducedMotion();
+      const spinMs = reduce ? 0 : fast ? FAST_SPIN_MS : SPIN_MS;
+      const spins = reduce ? 0 : fast ? 2 : 5;
+      setSpinDuration(spinMs);
+      setRotation((prev) => {
+        const currentMod = ((prev % 360) + 360) % 360;
+        const desiredMod = ((360 - targetCenter) % 360 + 360) % 360;
+        const delta = (desiredMod - currentMod + 360) % 360;
+        return prev + spins * 360 + delta;
+      });
+      setPhase("spinning");
+      spinTimer.current = window.setTimeout(
+        () => {
+          setRevealed((r) => r + 1);
+          setPhase("revealed");
+        },
+        reduce ? 60 : spinMs + (fast ? 80 : 200)
+      );
+    },
+    [assignments, phase, done, revealed, wheel]
+  );
 
   const proceed = useCallback(() => {
     if (phase !== "revealed" || revealed >= TOTAL) return;
@@ -207,6 +218,7 @@ export default function Draw() {
   const reset = useCallback(() => {
     if (spinTimer.current) clearTimeout(spinTimer.current);
     busyRef.current = false;
+    setAuto(false);
     localStorage.removeItem(STORAGE_KEY);
     setAssignments(null);
     setSeed(null);
@@ -217,11 +229,33 @@ export default function Draw() {
     setCopied(false);
   }, []);
 
+  // --- Skip / auto-run ------------------------------------------------------
+  // While `auto` is on, drive the spin → reveal → next cycle on a brisk timer
+  // so the rest of the draw plays out on its own. Each phase transition
+  // re-runs this effect, which schedules the next step.
+  useEffect(() => {
+    if (!auto) return;
+    if (done) {
+      setAuto(false);
+      return;
+    }
+    if (phase === "idle") {
+      const t = window.setTimeout(() => spin(true), FAST_GAP_MS);
+      return () => clearTimeout(t);
+    }
+    if (phase === "revealed") {
+      const t = window.setTimeout(() => proceed(), FAST_REVEAL_MS);
+      return () => clearTimeout(t);
+    }
+    // "spinning": the spin's own timer advances to "revealed", which re-runs us.
+  }, [auto, phase, done, spin, proceed]);
+
   // Keyboard control for the live host.
   useEffect(() => {
     if (!assignments) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.repeat) return; // ignore key auto-repeat from a held key
+      if (auto) return; // skip-mode drives itself; ignore manual keys
       if (e.code !== "Space" && e.code !== "Enter") return;
       const el = document.activeElement as HTMLElement | null;
       const tag = el?.tagName;
@@ -238,7 +272,7 @@ export default function Draw() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [assignments, phase, done, locked, spin, proceed]);
+  }, [assignments, phase, done, locked, auto, spin, proceed]);
 
   const copy = () => {
     navigator.clipboard?.writeText(exportJson);
@@ -454,23 +488,40 @@ export default function Draw() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {!done && phase !== "revealed" && (
+          {!done && !auto && phase !== "revealed" && (
             <button
               data-advance="true"
-              onClick={spin}
+              onClick={() => spin()}
               disabled={phase === "spinning"}
               className="rounded-lg bg-brand px-6 py-3 font-display text-base font-semibold uppercase tracking-wide text-pitch transition hover:bg-brand/90 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-pitch"
             >
               {phase === "spinning" ? "Spinning…" : "Spin the wheel"}
             </button>
           )}
-          {!done && phase === "revealed" && (
+          {!done && !auto && phase === "revealed" && (
             <button
               data-advance="true"
               onClick={proceed}
               className="rounded-lg bg-brand px-6 py-3 font-display text-base font-semibold uppercase tracking-wide text-pitch transition hover:bg-brand/90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-pitch"
             >
               Next Player
+            </button>
+          )}
+          {!done && auto && (
+            <span className="inline-flex items-center gap-2 rounded-lg bg-brand/10 px-6 py-3 font-display text-base font-semibold uppercase tracking-wide text-brand">
+              <span
+                aria-hidden="true"
+                className="live-dot inline-block h-2 w-2 rounded-full bg-brand"
+              />
+              Skipping…
+            </span>
+          )}
+          {!done && (
+            <button
+              onClick={() => setAuto((a) => !a)}
+              className="rounded-lg border border-pitch-line px-5 py-3 font-display text-sm uppercase tracking-wide text-chalk-muted transition hover:bg-pitch-surface hover:text-chalk focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chalk-muted focus-visible:ring-offset-2 focus-visible:ring-offset-pitch"
+            >
+              {auto ? "Stop" : "Skip to end"}
             </button>
           )}
           {done && !locked && (
