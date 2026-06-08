@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local / editor / OS
+*.local
+.DS_Store
+.claude/
+
+# TypeScript build info
+*.tsbuildinfo

@@ -1,0 +1,156 @@
+@import "tailwindcss";
+@import "@fontsource-variable/oswald";
+
+/* Matchday (Broadcast) theme — pitch-dark stage, vivid lime accent,
+   condensed Oswald display for the sporty TV-draw feel. */
+@theme {
+  --font-display: "Oswald Variable", "Arial Narrow", system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  --color-pitch: #08120c; /* deep green-black page */
+  --color-pitch-surface: #0d1c13; /* raised panel */
+  --color-pitch-elevated: #112619; /* hover / active row */
+  --color-pitch-line: #1c3a28; /* hairline borders */
+  --color-brand: #b6ff3c; /* vivid lime accent */
+  --color-brand-dim: #7bbf24;
+  --color-chalk: #eaf4ec; /* off-white text */
+  --color-chalk-muted: #8fae9a; /* muted green-grey text */
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--color-pitch);
+  color: var(--color-chalk);
+  font-family: var(--font-sans);
+}
+
+/* Faint pitch stripes behind the whole stage — subtle, never animated. */
+.pitch-stripes {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.012) 0px,
+    rgba(255, 255, 255, 0.012) 64px,
+    transparent 64px,
+    transparent 128px
+  );
+}
+
+/* A single diagonal light sweep across the flag tile on each reveal. */
+@keyframes sweep {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(220%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+/* The revealed flag/name pops in with weight. */
+@keyframes flagpop {
+  0% {
+    transform: scale(0.82);
+    opacity: 0;
+    filter: blur(6px);
+  }
+  60% {
+    transform: scale(1.03);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes nameslide {
+  0% {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Scoreboard row flashes when its team lands. */
+@keyframes rowflash {
+  0% {
+    background-color: color-mix(in srgb, var(--color-brand) 22%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Flag tile gets a brief lime glow-ring as the team lands. */
+@keyframes landglow {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 18px transparent;
+  }
+}
+
+/* LIVE dot pulse. */
+@keyframes livepulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 60%, transparent);
+  }
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+.anim-sweep {
+  animation: sweep 900ms ease-out;
+}
+.anim-flagpop {
+  animation: flagpop 620ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+.anim-nameslide {
+  animation: nameslide 520ms 120ms cubic-bezier(0.2, 0.9, 0.2, 1) backwards;
+}
+.anim-rowflash {
+  animation: rowflash 1100ms ease-out;
+}
+.anim-landglow {
+  animation: landglow 700ms ease-out;
+}
+.live-dot {
+  animation: livepulse 1.6s ease-in-out infinite;
+}
+
+/* Progress fill: transform-based (no width animation / no layout shift). */
+.progress-fill {
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-sweep,
+  .anim-flagpop,
+  .anim-nameslide,
+  .anim-rowflash,
+  .anim-landglow,
+  .live-dot {
+    animation: none !important;
+  }
+  .progress-fill {
+    transition: none !important;
+  }
+}
