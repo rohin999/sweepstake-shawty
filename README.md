@@ -14,8 +14,8 @@ A web app for an 8-person, 6-teams-each World Cup sweepstakes.
 |---|---|
 | Players | 8 |
 | Teams each | 6 |
-| Buy-in | £20/person → £160 pot |
-| Main prizes | 1st £120 · 2nd £40 |
+| Buy-in | £20/person — 7 paying players → £140 pot |
+| Prize | Winner takes all — £140 |
 
 ## Running locally
 

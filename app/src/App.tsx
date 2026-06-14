@@ -56,8 +56,9 @@ export default function App() {
       </main>
       <footer className="border-t border-pitch-line px-4 py-6">
         <p className="mx-auto max-w-6xl text-center text-xs text-chalk-muted sm:text-left">
-          World Cup 2026 Sweepstakes · 8 players · £20 buy-in · Win-chance from
-          bookmaker outright odds, for fun only.
+          World Cup 2026 Sweepstakes · 7 paying players · £20 buy-in · winner
+          takes all (£140) · Win-chance from bookmaker outright odds, for fun
+          only.
         </p>
       </footer>
     </div>
