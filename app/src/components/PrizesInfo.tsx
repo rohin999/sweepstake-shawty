@@ -1,6 +1,5 @@
 const MAIN_PRIZES = [
-  { place: "1st", label: "Winner", amount: "£120", accent: true, icon: "🏆" },
-  { place: "2nd", label: "Runner-up", amount: "£40", accent: false, icon: "🥈" },
+  { place: "Takes the whole pot", label: "Winner", amount: "£140", accent: true, icon: "🏆" },
 ] as const;
 
 export default function PrizesInfo() {
@@ -25,7 +24,7 @@ export default function PrizesInfo() {
             Buy-in
           </p>
           <p className="mt-1 text-sm text-chalk-muted">
-            Flat entry per player
+            7 players pay &times; £20 &rarr; £140 pot
           </p>
         </div>
         <p className="font-display text-5xl font-semibold leading-none text-brand">
@@ -36,23 +35,16 @@ export default function PrizesInfo() {
         </p>
       </section>
 
-      {/* Podium motif (top 2) — decorative; data is announced in the list below */}
+      {/* Podium motif (winner takes all) — decorative; data announced below */}
       <section className="mb-8" aria-hidden="true">
-        <div className="flex items-end justify-center gap-2 sm:gap-4">
+        <div className="flex items-end justify-center">
           {/* 1st */}
-          <div className="flex w-24 flex-col items-center sm:w-32">
+          <div className="flex w-28 flex-col items-center sm:w-36">
             <span className="text-5xl [filter:drop-shadow(0_0_10px_color-mix(in_srgb,var(--color-brand)_55%,transparent))]">
               🏆
             </span>
             <div className="mt-2 flex h-24 w-full items-start justify-center rounded-t-lg border border-brand-dim bg-pitch-elevated pt-2 font-display text-lg font-semibold text-brand">
-              £120
-            </div>
-          </div>
-          {/* 2nd */}
-          <div className="flex w-20 flex-col items-center sm:w-28">
-            <span className="text-3xl">🥈</span>
-            <div className="mt-2 flex h-16 w-full items-start justify-center rounded-t-lg border border-pitch-line bg-pitch-surface pt-2 font-display text-sm text-chalk-muted">
-              £40
+              £140
             </div>
           </div>
         </div>
@@ -62,7 +54,7 @@ export default function PrizesInfo() {
       {/* Main prizes */}
       <section className="mb-8">
         <h3 className="font-display mb-3 text-lg font-semibold uppercase tracking-wide text-chalk">
-          Main Prizes
+          Prize
         </h3>
         <ul className="overflow-hidden rounded-2xl border border-pitch-line bg-pitch-surface">
           {MAIN_PRIZES.map((p) => (
@@ -88,7 +80,7 @@ export default function PrizesInfo() {
                     {p.label}
                   </span>
                   <span className="font-display text-[11px] uppercase tracking-widest text-chalk-muted">
-                    {p.place} place
+                    {p.place}
                   </span>
                 </span>
               </span>
