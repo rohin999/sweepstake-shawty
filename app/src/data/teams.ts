@@ -35,7 +35,7 @@ const RAW: RawTeam[] = [
   { id: "SEN", name: "Senegal", flag: "🇸🇳", fifaRank: 14, group: "I", odds: "125/1" },
   { id: "MEX", name: "Mexico", flag: "🇲🇽", fifaRank: 15, group: "A", odds: "66/1" },
   { id: "USA", name: "United States", flag: "🇺🇸", fifaRank: 16, group: "D", odds: "66/1" },
-  { id: "URU", name: "Uruguay", flag: "🇺🇾", fifaRank: 17, group: "H", odds: "66/1" },
+  { id: "ITA", name: "Italy", flag: "🇮🇹", fifaRank: 12, group: "H", odds: "16/1" },
   { id: "JPN", name: "Japan", flag: "🇯🇵", fifaRank: 18, group: "F", odds: "50/1" },
   { id: "SUI", name: "Switzerland", flag: "🇨🇭", fifaRank: 19, group: "B", odds: "80/1" },
   { id: "IRN", name: "Iran", flag: "🇮🇷", fifaRank: 21, group: "G", odds: "500/1" },

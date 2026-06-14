@@ -34,8 +34,7 @@ export default function PrizesInfo() {
           Prizes &amp; Buy-in
         </h2>
         <p className="mt-3 text-sm text-chalk-muted">
-          Four teams each, one from every quartile. Here&rsquo;s what&rsquo;s on
-          the line.
+          Six teams each. Here&rsquo;s what&rsquo;s on the line.
         </p>
       </div>
 
@@ -46,11 +45,11 @@ export default function PrizesInfo() {
             Buy-in
           </p>
           <p className="mt-1 text-sm text-chalk-muted">
-            4 teams &times; £10 per team
+            6 teams &times; £10 per team
           </p>
         </div>
         <p className="font-display text-5xl font-semibold leading-none text-brand">
-          £40
+          £60
           <span className="ml-2 align-middle text-sm font-normal uppercase tracking-widest text-chalk-muted">
             per player
           </span>

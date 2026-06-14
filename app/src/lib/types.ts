@@ -18,5 +18,5 @@ export interface Person {
 
 export interface Pick {
   personId: string;
-  teamIds: [string, string, string, string]; // one per quartile, in quartile order
+  teamIds: string[]; // the person's six teams
 }
