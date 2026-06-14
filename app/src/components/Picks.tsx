@@ -2,28 +2,29 @@ import { PEOPLE } from "../data/people";
 import { PICKS } from "../data/picks";
 import { TEAMS_BY_ID } from "../data/teams";
 import { barFraction, formatProbability, impliedProbability } from "../lib/odds";
-import type { Quartile, Team } from "../lib/types";
+import type { Team } from "../lib/types";
 
-const ROMAN = ["I", "II", "III", "IV"] as const;
-
-// Map each person to their four teams, indexed by quartile (1-4).
-const teamsByPerson = new Map<string, (Team | undefined)[]>();
+// Map each person to their teams, strongest (best win chance) first.
+const teamsByPerson = new Map<string, Team[]>();
 for (const pick of PICKS) {
-  const slots: (Team | undefined)[] = [undefined, undefined, undefined, undefined];
-  for (const id of pick.teamIds) {
-    const team = TEAMS_BY_ID[id];
-    if (team) slots[team.quartile - 1] = team;
-  }
-  teamsByPerson.set(pick.personId, slots);
+  const teams = pick.teamIds
+    .map((id) => TEAMS_BY_ID[id])
+    .filter((t): t is Team => Boolean(t))
+    .sort((a, b) => impliedProbability(b.odds) - impliedProbability(a.odds));
+  teamsByPerson.set(pick.personId, teams);
 }
 
-// Order players by their Pot I team's % chance of winning (strongest first).
-const potOneChance = (personId: string): number => {
-  const potOne = teamsByPerson.get(personId)?.[0];
-  return potOne ? impliedProbability(potOne.odds) : -1;
-};
+// Combined win chance across a person's teams (chance at least one wins ≈ sum,
+// since at most one team can win — outright probabilities are mutually exclusive).
+const combinedChance = (personId: string): number =>
+  (teamsByPerson.get(personId) ?? []).reduce(
+    (sum, t) => sum + impliedProbability(t.odds),
+    0
+  );
+
+// Order players by their combined win chance (strongest squad first).
 const SORTED_PEOPLE = [...PEOPLE].sort(
-  (a, b) => potOneChance(b.id) - potOneChance(a.id)
+  (a, b) => combinedChance(b.id) - combinedChance(a.id)
 );
 
 // Subtle strength tint within tokens: bright lime for favourites, fading to
@@ -44,7 +45,7 @@ function ThermoPill({ odds }: { odds: string }) {
       title={`${pct} chance of winning (odds ${odds})`}
     >
       <div
-        className="relative h-12 w-2 overflow-hidden rounded-full bg-pitch-line"
+        className="relative h-10 w-2 overflow-hidden rounded-full bg-pitch-line"
         role="img"
         aria-label={`${pct} chance of winning`}
       >
@@ -71,8 +72,7 @@ export default function Picks() {
           The Picks
         </h2>
         <p className="mt-3 text-sm text-chalk-muted">
-          Twelve players, four teams each — one from every FIFA-ranking
-          quartile.
+          Eight players, six teams each.
         </p>
         <div className="mt-3 flex items-center justify-center gap-2 text-xs text-chalk-muted sm:justify-start">
           <span
@@ -89,58 +89,47 @@ export default function Picks() {
         </div>
       </div>
 
-      <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        <section className="min-w-[40rem] overflow-hidden rounded-2xl border border-pitch-line sm:min-w-0">
-          <div className="grid grid-cols-[minmax(7rem,1.2fr)_repeat(4,minmax(5rem,1fr))] bg-pitch-surface px-3 py-2.5 font-display text-[11px] uppercase tracking-widest text-chalk-muted">
-            <span className="sticky left-0 z-10 bg-pitch-surface">Player</span>
-            {([1, 2, 3, 4] as Quartile[]).map((q) => (
-              <span key={q} className="text-center">
-                Pot {ROMAN[q - 1]}
-              </span>
-            ))}
-          </div>
-          {SORTED_PEOPLE.map((person) => {
-            const slots = teamsByPerson.get(person.id) ?? [];
-            return (
-              <div
-                key={person.id}
-                className="grid grid-cols-[minmax(7rem,1.2fr)_repeat(4,minmax(5rem,1fr))] items-stretch border-t border-pitch-line transition-colors hover:bg-pitch-elevated"
+      <div className="grid gap-4 sm:grid-cols-2">
+        {SORTED_PEOPLE.map((person) => {
+          const teams = teamsByPerson.get(person.id) ?? [];
+          return (
+            <section
+              key={person.id}
+              className="overflow-hidden rounded-2xl border border-pitch-line bg-pitch-surface"
+            >
+              <header
+                className="flex items-center justify-between border-l-[3px] px-4 py-3"
+                style={{ borderLeftColor: person.colour }}
               >
+                <h3 className="font-display truncate text-base uppercase tracking-wide text-chalk">
+                  {person.name}
+                </h3>
                 <span
-                  className="sticky left-0 z-10 flex items-center gap-2 border-l-[3px] bg-pitch-surface px-3 py-2 font-display text-sm uppercase tracking-wide"
-                  style={{ borderLeftColor: person.colour }}
+                  className="font-display text-xs uppercase tracking-widest tabular-nums text-chalk-muted"
+                  title="Combined chance one of these teams wins the tournament"
                 >
-                  <span className="truncate text-chalk">{person.name}</span>
+                  {formatProbability(combinedChance(person.id))}
                 </span>
-                {([1, 2, 3, 4] as Quartile[]).map((q) => {
-                  const team = slots[q - 1];
-                  return (
-                    <div
-                      key={q}
-                      className="flex items-stretch justify-center gap-1.5 border-l border-pitch-line px-1.5 py-2.5"
-                    >
-                      {team ? (
-                        <>
-                          <div className="flex min-w-0 flex-1 flex-col items-center justify-start gap-1 text-center">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-pitch-elevated text-xl leading-none ring-1 ring-pitch-line">
-                              {team.flag}
-                            </span>
-                            <span className="font-display text-[11px] uppercase leading-tight tracking-wide text-chalk sm:text-[12px]">
-                              {team.name}
-                            </span>
-                          </div>
-                          <ThermoPill odds={team.odds} />
-                        </>
-                      ) : (
-                        <span className="self-center text-sm text-pitch-line">—</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </section>
+              </header>
+              <ul className="divide-y divide-pitch-line border-t border-pitch-line">
+                {teams.map((team) => (
+                  <li
+                    key={team.id}
+                    className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pitch-elevated"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-pitch-elevated text-xl leading-none ring-1 ring-pitch-line">
+                      {team.flag}
+                    </span>
+                    <span className="font-display flex-1 truncate text-sm uppercase tracking-wide text-chalk">
+                      {team.name}
+                    </span>
+                    <ThermoPill odds={team.odds} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
       </div>
     </div>
   );
