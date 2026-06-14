@@ -9,7 +9,7 @@ export const PICKS: Pick[] = [
   { personId: "p05", teamIds: ["ESP", "EGY", "AUS", "GER", "HAI", "COD"] },
   { personId: "p06", teamIds: ["NED", "SEN", "TUN", "POR", "CZE", "CPV"] },
   { personId: "p07", teamIds: ["USA", "BEL", "IRN", "MEX", "NZL", "IRQ"] },
-  { personId: "p08", teamIds: ["CAN", "ITA", "RSA", "QAT", "TUR", "SCO"] },
+  { personId: "p08", teamIds: ["CAN", "URU", "RSA", "QAT", "TUR", "SCO"] },
 ];
 
 export const hasPicks = (): boolean => PICKS.length > 0;

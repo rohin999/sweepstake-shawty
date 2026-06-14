@@ -1,26 +1,6 @@
 const MAIN_PRIZES = [
-  { place: "1st", label: "Winner", amount: "£270", accent: true, icon: "🏆" },
-  { place: "2nd", label: "Runner-up", amount: "£90", accent: false, icon: "🥈" },
-  { place: "3rd", label: "Third", amount: "£40", accent: false, icon: "🥉" },
-  { place: "4th", label: "Fourth", amount: "£20", accent: false, icon: "🎖️" },
-] as const;
-
-const BONUS_PRIZES = [
-  {
-    title: "Leakiest defence",
-    desc: "Team with the most goals conceded",
-    amount: "£20",
-  },
-  {
-    title: "Fastest goal",
-    desc: "Quickest goal of the tournament",
-    amount: "£20",
-  },
-  {
-    title: "Goal of the tournament",
-    desc: "",
-    amount: "£20",
-  },
+  { place: "1st", label: "Winner", amount: "£120", accent: true, icon: "🏆" },
+  { place: "2nd", label: "Runner-up", amount: "£40", accent: false, icon: "🥈" },
 ] as const;
 
 export default function PrizesInfo() {
@@ -45,40 +25,33 @@ export default function PrizesInfo() {
             Buy-in
           </p>
           <p className="mt-1 text-sm text-chalk-muted">
-            6 teams &times; £10 per team
+            Flat entry per player
           </p>
         </div>
         <p className="font-display text-5xl font-semibold leading-none text-brand">
-          £60
+          £20
           <span className="ml-2 align-middle text-sm font-normal uppercase tracking-widest text-chalk-muted">
             per player
           </span>
         </p>
       </section>
 
-      {/* Podium motif (top 3) — decorative; data is announced in the list below */}
+      {/* Podium motif (top 2) — decorative; data is announced in the list below */}
       <section className="mb-8" aria-hidden="true">
         <div className="flex items-end justify-center gap-2 sm:gap-4">
-          {/* 2nd */}
-          <div className="flex w-20 flex-col items-center sm:w-28">
-            <span className="text-3xl">🥈</span>
-            <div className="mt-2 flex h-16 w-full items-start justify-center rounded-t-lg border border-pitch-line bg-pitch-surface pt-2 font-display text-sm text-chalk-muted">
-              £90
-            </div>
-          </div>
           {/* 1st */}
           <div className="flex w-24 flex-col items-center sm:w-32">
             <span className="text-5xl [filter:drop-shadow(0_0_10px_color-mix(in_srgb,var(--color-brand)_55%,transparent))]">
               🏆
             </span>
             <div className="mt-2 flex h-24 w-full items-start justify-center rounded-t-lg border border-brand-dim bg-pitch-elevated pt-2 font-display text-lg font-semibold text-brand">
-              £270
+              £120
             </div>
           </div>
-          {/* 3rd */}
+          {/* 2nd */}
           <div className="flex w-20 flex-col items-center sm:w-28">
-            <span className="text-3xl">🥉</span>
-            <div className="mt-2 flex h-12 w-full items-start justify-center rounded-t-lg border border-pitch-line bg-pitch-surface pt-2 font-display text-sm text-chalk-muted">
+            <span className="text-3xl">🥈</span>
+            <div className="mt-2 flex h-16 w-full items-start justify-center rounded-t-lg border border-pitch-line bg-pitch-surface pt-2 font-display text-sm text-chalk-muted">
               £40
             </div>
           </div>
@@ -131,29 +104,6 @@ export default function PrizesInfo() {
             </li>
           ))}
         </ul>
-      </section>
-
-      {/* Bonus prizes */}
-      <section>
-        <h3 className="font-display mb-3 text-lg font-semibold uppercase tracking-wide text-chalk">
-          Bonus Prizes
-        </h3>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {BONUS_PRIZES.map((b) => (
-            <div
-              key={b.title}
-              className="flex flex-col rounded-2xl border border-pitch-line bg-pitch-surface px-5 py-5"
-            >
-              <span className="font-display text-3xl font-semibold tabular-nums text-brand">
-                {b.amount}
-              </span>
-              <span className="font-display mt-2 text-sm uppercase tracking-wide text-chalk">
-                {b.title}
-              </span>
-              <span className="mt-1 text-xs text-chalk-muted">{b.desc}</span>
-            </div>
-          ))}
-        </div>
       </section>
     </div>
   );
